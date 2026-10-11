@@ -2,8 +2,8 @@
   "schema": 1,
   "courseId": 2074,
   "repository": "LearningOS/2026a-oscamp-base-fafacao86",
-  "commit": "ab459ee0ff1e19b316b75480ac7d95e97b70c78a",
-  "score": 19,
+  "commit": "468078985d37250c7c4b94752bbd2898db6e8912",
+  "score": 29,
   "totalScore": 100,
   "exercises": [
     {
@@ -44,16 +44,16 @@
     {
       "name": "bump_allocator",
       "max": 5,
-      "score": 0,
-      "status": "fail",
-      "exitCode": 101
+      "score": 5,
+      "status": "pass",
+      "exitCode": 0
     },
     {
       "name": "free_list_allocator",
       "max": 5,
-      "score": 0,
-      "status": "fail",
-      "exitCode": 101
+      "score": 5,
+      "status": "pass",
+      "exitCode": 0
     },
     {
       "name": "syscall_wrapper",
@@ -176,9 +176,9 @@
     }
   ],
   "student": "fafacao86",
-  "runId": "38122093817",
+  "runId": "38128750118",
   "runAttempt": "1",
   "upload": {
-    "status": "accepted"
+    "status": "pending"
   }
 }
