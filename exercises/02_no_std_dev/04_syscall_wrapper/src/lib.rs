@@ -53,23 +53,54 @@ pub struct SyscallABI {
 
 /// Return the x86_64 Linux syscall ABI description
 pub fn x86_64_abi() -> SyscallABI {
-    // TODO: Fill in the x86_64 syscall ABI
-    // Hint: x86_64 uses the "syscall" instruction, syscall number in rax
-    todo!()
+    SyscallABI {
+        arch: "x86_64",
+        instruction: "syscall",
+        id_reg: "rax",
+        ret_reg: "rax",
+        arg_regs: &["rdi", "rsi", "rdx", "r10", "r8", "r9"],
+        // `syscall` saves the return address in rcx and RFLAGS in r11, so both
+        // are destroyed by the instruction itself.
+        clobbered: &["rcx", "r11"],
+        sys_write: 1,
+        sys_read: 0,
+        sys_close: 3,
+        sys_exit: 60,
+    }
 }
 
 /// Return the aarch64 Linux syscall ABI description
 pub fn aarch64_abi() -> SyscallABI {
-    // TODO: Fill in the aarch64 syscall ABI
-    // Hint: aarch64 uses the "svc #0" instruction, syscall number in x8
-    todo!()
+    SyscallABI {
+        arch: "aarch64",
+        instruction: "svc #0",
+        id_reg: "x8",
+        ret_reg: "x0",
+        arg_regs: &["x0", "x1", "x2", "x3", "x4", "x5"],
+        clobbered: &[],
+        // asm-generic table, shared with riscv64
+        sys_write: 64,
+        sys_read: 63,
+        sys_close: 57,
+        sys_exit: 93,
+    }
 }
 
 /// Return the riscv64 Linux syscall ABI description
 pub fn riscv64_abi() -> SyscallABI {
-    // TODO: Fill in the riscv64 syscall ABI
-    // Hint: riscv64 uses the "ecall" instruction, syscall number in a7
-    todo!()
+    SyscallABI {
+        arch: "riscv64",
+        instruction: "ecall",
+        id_reg: "a7",
+        ret_reg: "a0",
+        arg_regs: &["a0", "a1", "a2", "a3", "a4", "a5"],
+        clobbered: &[],
+        // asm-generic table, shared with aarch64
+        sys_write: 64,
+        sys_read: 63,
+        sys_close: 57,
+        sys_exit: 93,
+    }
 }
 
 // ============================================================
@@ -82,24 +113,56 @@ pub fn riscv64_abi() -> SyscallABI {
 /// The caller must ensure the syscall number and arguments are valid.
 #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
 pub unsafe fn syscall3(id: usize, arg0: usize, arg1: usize, arg2: usize) -> isize {
-    // TODO: Implement x86_64 syscall using core::arch::asm!
-    // Hints:
-    //   - "syscall" instruction
-    //   - inlateout("rax") id => ret
-    //   - in("rdi") arg0, in("rsi") arg1, in("rdx") arg2
-    //   - out("rcx") _, out("r11") _
-    todo!()
+    use core::arch::asm;
+
+    let ret: isize;
+    // rax carries the syscall number on the way in and the result on the way
+    // out, hence `inlateout`. rcx/r11 are clobbered by the instruction itself.
+    asm!(
+        "syscall",
+        inlateout("rax") id as isize => ret,
+        in("rdi") arg0,
+        in("rsi") arg1,
+        in("rdx") arg2,
+        lateout("rcx") _,
+        lateout("r11") _,
+        options(nostack)
+    );
+    ret
 }
 
 #[cfg(all(target_arch = "aarch64", target_os = "linux"))]
 pub unsafe fn syscall3(id: usize, arg0: usize, arg1: usize, arg2: usize) -> isize {
-    // TODO: Implement aarch64 syscall using core::arch::asm!
-    // Hints:
-    //   - "svc #0" instruction
-    //   - in("x8") id
-    //   - inlateout("x0") arg0 => ret
-    //   - in("x1") arg1, in("x2") arg2
-    todo!()
+    use core::arch::asm;
+
+    let ret: isize;
+    // x0 is both the first argument and the return value; x8 holds the number.
+    asm!(
+        "svc #0",
+        in("x8") id,
+        inlateout("x0") arg0 as isize => ret,
+        in("x1") arg1,
+        in("x2") arg2,
+        options(nostack)
+    );
+    ret
+}
+
+#[cfg(all(target_arch = "riscv64", target_os = "linux"))]
+pub unsafe fn syscall3(id: usize, arg0: usize, arg1: usize, arg2: usize) -> isize {
+    use core::arch::asm;
+
+    let ret: isize;
+    // a0 is both the first argument and the return value; a7 holds the number.
+    asm!(
+        "ecall",
+        in("a7") id,
+        inlateout("a0") arg0 as isize => ret,
+        in("a1") arg1,
+        in("a2") arg2,
+        options(nostack)
+    );
+    ret
 }
 
 // Non-Linux platforms: provide a stub so the code compiles
@@ -127,38 +190,64 @@ const NATIVE_SYS_CLOSE: usize = 57;
 #[cfg(target_arch = "aarch64")]
 const NATIVE_SYS_EXIT: usize = 93;
 
+// riscv64 shares the asm-generic table with aarch64
+#[cfg(target_arch = "riscv64")]
+const NATIVE_SYS_WRITE: usize = 64;
+#[cfg(target_arch = "riscv64")]
+const NATIVE_SYS_READ: usize = 63;
+#[cfg(target_arch = "riscv64")]
+const NATIVE_SYS_CLOSE: usize = 57;
+#[cfg(target_arch = "riscv64")]
+const NATIVE_SYS_EXIT: usize = 93;
+
 // Fallback for other architectures (not actually used, just for compilation)
-#[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
+#[cfg(not(any(
+    target_arch = "x86_64",
+    target_arch = "aarch64",
+    target_arch = "riscv64"
+)))]
 const NATIVE_SYS_WRITE: usize = 0;
-#[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
+#[cfg(not(any(
+    target_arch = "x86_64",
+    target_arch = "aarch64",
+    target_arch = "riscv64"
+)))]
 const NATIVE_SYS_READ: usize = 0;
-#[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
+#[cfg(not(any(
+    target_arch = "x86_64",
+    target_arch = "aarch64",
+    target_arch = "riscv64"
+)))]
 const NATIVE_SYS_CLOSE: usize = 0;
-#[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
+#[cfg(not(any(
+    target_arch = "x86_64",
+    target_arch = "aarch64",
+    target_arch = "riscv64"
+)))]
 const NATIVE_SYS_EXIT: usize = 0;
 
 /// Write data from `buf` to file descriptor `fd`.
 pub fn sys_write(fd: usize, buf: &[u8]) -> isize {
-    // TODO: Call syscall3 to implement write
-    todo!()
+    unsafe { syscall3(NATIVE_SYS_WRITE, fd, buf.as_ptr() as usize, buf.len()) }
 }
 
 /// Read data from file descriptor `fd` into `buf`.
 pub fn sys_read(fd: usize, buf: &mut [u8]) -> isize {
-    // TODO: Call syscall3 to implement read
-    todo!()
+    unsafe { syscall3(NATIVE_SYS_READ, fd, buf.as_mut_ptr() as usize, buf.len()) }
 }
 
 /// Close file descriptor `fd`.
 pub fn sys_close(fd: usize) -> isize {
-    // TODO: Call syscall3 to implement close
-    todo!()
+    unsafe { syscall3(NATIVE_SYS_CLOSE, fd, 0, 0) }
 }
 
 /// Terminate the current process.
 pub fn sys_exit(code: i32) -> ! {
-    // TODO: Call syscall3 to implement exit
-    todo!()
+    unsafe {
+        syscall3(NATIVE_SYS_EXIT, code as usize, 0, 0);
+    }
+    // exit never returns to the caller; if we get here the kernel misbehaved.
+    unreachable!("sys_exit returned")
 }
 
 // ============================================================
