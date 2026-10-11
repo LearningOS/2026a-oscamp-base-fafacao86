@@ -2,8 +2,8 @@
   "schema": 1,
   "courseId": 2074,
   "repository": "LearningOS/2026a-oscamp-base-fafacao86",
-  "commit": "468078985d37250c7c4b94752bbd2898db6e8912",
-  "score": 29,
+  "commit": "71f08f0d2899ab14269e74147971ba94ac56b18d",
+  "score": 43,
   "totalScore": 100,
   "exercises": [
     {
@@ -58,23 +58,23 @@
     {
       "name": "syscall_wrapper",
       "max": 5,
-      "score": 0,
-      "status": "fail",
-      "exitCode": 101
+      "score": 5,
+      "status": "pass",
+      "exitCode": 0
     },
     {
       "name": "fd_table",
       "max": 5,
-      "score": 0,
-      "status": "fail",
-      "exitCode": 101
+      "score": 5,
+      "status": "pass",
+      "exitCode": 0
     },
     {
       "name": "atomic_counter",
       "max": 4,
-      "score": 0,
-      "status": "fail",
-      "exitCode": 101
+      "score": 4,
+      "status": "pass",
+      "exitCode": 0
     },
     {
       "name": "atomic_ordering",
@@ -176,9 +176,9 @@
     }
   ],
   "student": "fafacao86",
-  "runId": "38128750118",
-  "runAttempt": "2",
+  "runId": "38140067453",
+  "runAttempt": "1",
   "upload": {
-    "status": "accepted"
+    "status": "pending"
   }
 }
