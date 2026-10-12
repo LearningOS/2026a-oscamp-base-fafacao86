@@ -2,8 +2,8 @@
   "schema": 1,
   "courseId": 2074,
   "repository": "LearningOS/2026a-oscamp-base-fafacao86",
-  "commit": "71f08f0d2899ab14269e74147971ba94ac56b18d",
-  "score": 43,
+  "commit": "1a8dbfe680f05348c616ac40ec7d341f47de7e4c",
+  "score": 60,
   "totalScore": 100,
   "exercises": [
     {
@@ -79,30 +79,30 @@
     {
       "name": "atomic_ordering",
       "max": 4,
-      "score": 0,
-      "status": "fail",
-      "exitCode": 101
+      "score": 4,
+      "status": "pass",
+      "exitCode": 0
     },
     {
       "name": "spinlock",
       "max": 4,
-      "score": 0,
-      "status": "fail",
-      "exitCode": 101
+      "score": 4,
+      "status": "pass",
+      "exitCode": 0
     },
     {
       "name": "spinlock_guard",
       "max": 4,
-      "score": 0,
-      "status": "fail",
-      "exitCode": 101
+      "score": 4,
+      "status": "pass",
+      "exitCode": 0
     },
     {
       "name": "rwlock",
       "max": 5,
-      "score": 0,
-      "status": "fail",
-      "exitCode": 101
+      "score": 5,
+      "status": "pass",
+      "exitCode": 0
     },
     {
       "name": "stack_coroutine",
@@ -176,9 +176,9 @@
     }
   ],
   "student": "fafacao86",
-  "runId": "38140067453",
+  "runId": "38265106007",
   "runAttempt": "1",
   "upload": {
-    "status": "accepted"
+    "status": "pending"
   }
 }
