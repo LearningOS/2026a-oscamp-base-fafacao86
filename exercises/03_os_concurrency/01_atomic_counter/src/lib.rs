@@ -53,11 +53,11 @@ impl AtomicCounter {
     /// Hint: read current value in loop, compute new value, try CAS to update, retry on failure.
     pub fn fetch_multiply(&self, multiplier: u64) -> u64 {
         loop {
-            let current = self.get();
+            let mut current = self.get();
             let new = current * multiplier;
             match self.compare_and_swap(current, new) {
                 Ok(v) => return v,
-                Err(v) => { self.value.store(v, Ordering::Relaxed); }
+                Err(v) => current = v,
             }
         }
     }
