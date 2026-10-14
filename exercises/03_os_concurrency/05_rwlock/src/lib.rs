@@ -62,14 +62,26 @@ impl<T> RwLock<T> {
     /// 3. If reader count (state & READER_MASK) is already READER_MASK, spin and continue.
     /// 4. Try compare_exchange(s, s + 1, AcqRel, Acquire); on success return RwLockReadGuard { lock: self }.
     pub fn read(&self) -> RwLockReadGuard<'_, T> {
-        while let state = self.state.load(Ordering::Acquire) {
+        loop {
+            let state = self.state.load(Ordering::Acquire);
             if state & (WRITER_HOLDING | WRITER_WAITING) != 0 {
+                std::hint::spin_loop();
                 continue;
             }
-            self.state.fetch_add(1, Ordering::AcqRel);
-            break;
+            if state & READER_MASK == READER_MASK {
+                std::hint::spin_loop();
+                continue;
+            }
+            match self.state.compare_exchange(
+                state,
+                state + 1,
+                Ordering::AcqRel,
+                Ordering::Acquire,
+            ) {
+                Ok(_) => return RwLockReadGuard { lock: self },
+                Err(_) => std::hint::spin_loop(),
+            }
         }
-        RwLockReadGuard { lock: self }
     }
 
     /// Acquire the write lock. Blocks until no readers and no other writer.
@@ -81,19 +93,22 @@ impl<T> RwLock<T> {
     /// 4. On success return RwLockWriteGuard { lock: self }.
     pub fn write(&self) -> RwLockWriteGuard<'_, T> {
         self.state.fetch_or(WRITER_WAITING, Ordering::Release);
-        while let state = self.state.load(Ordering::Acquire) {
+        loop {
+            let state = self.state.load(Ordering::Acquire);
             if state & (READER_MASK | WRITER_HOLDING) != 0 {
+                std::hint::spin_loop();
                 continue;
             }
-            loop {
-                match self.state.compare_exchange(state, state | WRITER_HOLDING, Ordering::AcqRel, Ordering::Acquire) {
-                    Ok(_) => break,
-                    Err(_) => { continue }
-                }
+            match self.state.compare_exchange(
+                state,
+                state | WRITER_HOLDING,
+                Ordering::AcqRel,
+                Ordering::Acquire,
+            ) {
+                Ok(_) => return RwLockWriteGuard { lock: self },
+                Err(_) => std::hint::spin_loop(),
             }
-            break;
         }
-        RwLockWriteGuard { lock: self }
     }
 }
 
