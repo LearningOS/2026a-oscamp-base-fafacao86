@@ -3,7 +3,7 @@
   "courseId": 2074,
   "repository": "LearningOS/2026a-oscamp-base-fafacao86",
   "commit": "e12a4d6548091ade953a9e7fd299a18dbb73545f",
-  "score": 67,
+  "score": 72,
   "totalScore": 100,
   "exercises": [
     {
@@ -100,9 +100,9 @@
     {
       "name": "rwlock",
       "max": 5,
-      "score": 0,
-      "status": "timeout",
-      "exitCode": 124
+      "score": 5,
+      "status": "pass",
+      "exitCode": 0
     },
     {
       "name": "stack_coroutine",
@@ -177,8 +177,8 @@
   ],
   "student": "fafacao86",
   "runId": "38571895296",
-  "runAttempt": "1",
+  "runAttempt": "2",
   "upload": {
-    "status": "accepted"
+    "status": "pending"
   }
 }
